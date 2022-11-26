@@ -5,13 +5,31 @@ import {
   Token,
   SQLAggregateFunction,
   SQLQueryResponse,
-  StationWithAggregatedMeasurement
+  StationWithAggregatedMeasurement,
+  TimeSerieStep,
+  SQLQueryParams
 } from "../domain";
-import { BASE_URL, DATASET, TABLE_AQSTATIONS, TABLE_AQMEASUREMENTS } from "../conf/CartoConf";
 
-import axios from "axios";
+import {
+  GCP_BASE,
+  DATASET_CODETEST,
+  DATASET_CODETEST_TABLE_AQMEASUREMENTS,
+  DATASET_CODETEST_TABLE_AQSTATIONS,
+  DATASET_WORLDPOP,
+  DATASET_WORLDPOP_TABLE_GEOGRID,
+  DATASET_WORLDPOP_TABLE_POPULATION
+} from "../conf/CartoConf";
 
+import axios, { AxiosInstance } from "axios";
+
+/**
+ * Cached Token in memory
+ */
 let cached_token: Token = null;
+/**
+ * Gets an Auth Token to be used on the query api
+ * @returns: string
+ */
 const getToken = async (): Promise<string> => {
   // TODO: manage token expiration
   if (cached_token !== null) {
@@ -36,8 +54,20 @@ const getToken = async (): Promise<string> => {
   }
 };
 
+let axiosCartoQueryRequester: AxiosInstance = null;
+const getQueryRequester = async () => {
+  if (axiosCartoQueryRequester === null) {
+    axiosCartoQueryRequester = axios.create({
+      baseURL: `${GCP_BASE}/v3/sql/carto_dw/query`,
+      headers: {
+        Authorization: `Bearer ${await getToken()}`
+      }
+    });
+  }
+  return axiosCartoQueryRequester;
+};
+/*
 const getTokenAxios = async (): Promise<string> => {
-  // TODO: manage token expiration
   if (cached_token !== null) {
     return cached_token.access_token;
   } else {
@@ -58,53 +88,72 @@ const getTokenAxios = async (): Promise<string> => {
     return cached_token.access_token;
   }
 };
-
+*/
+/**
+ * @typedef {Object} GetStationMeasurementAggregatedParams
+ * @property {AirQualityPollutant} pollutant Pollutant to get measurements from
+ * @property {SQLAggregateFunction} aggregate SQL Aggregate function
+ * @property {string} timeinstant_from XXXXXXXX
+ * @property {string} timeinstant_to XXXXXXXXX
+ * XXXXXXXX
+ */
 type GetStationMeasurementAggregatedParams = {
   pollutant: AirQualityPollutant;
   aggregate: SQLAggregateFunction;
   timeinstant_from: string;
   timeinstant_to: string;
 };
-
+/**
+ * Gets a list of stations xxxx
+ * @param {GetStationMeasurementAggregatedParams} param - {@link GetStationMeasurementAggregatedParams} object
+ * containing all parameters needed to perform the request
+ * @returns promise to be fulfilled with an array of XXXXXX
+ */
 export const getStationMeasurementAggregated = async ({
   pollutant,
   aggregate,
   timeinstant_from,
   timeinstant_to
 }: GetStationMeasurementAggregatedParams): Promise<StationWithAggregatedMeasurement[]> => {
-  const { data } = await axios.get<SQLQueryResponse<StationWithAggregatedMeasurement>>(
-    `${BASE_URL}/v3/sql/carto_dw/query`,
-    {
-      params: {
-        q: `select s.station_id, ${aggregate}(aq.${pollutant}) as pollutant_aggregate 
-            from ${DATASET}.${TABLE_AQSTATIONS} s left join ${DATASET}.${TABLE_AQMEASUREMENTS} aq on s.station_id = aq.station_id 
-            where timeinstant between "${timeinstant_from}" and "${timeinstant_to}"
-            group by s.station_id`
-      },
-      headers: {
-        Authorization: `Bearer ${await getToken()}`
-      }
-    }
+  const params: SQLQueryParams = {
+    q: `SELECT s.station_id, ${aggregate}(aq.${pollutant}) AS pollutant_aggregated, p.population
+        FROM ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQSTATIONS} s LEFT JOIN ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQMEASUREMENTS} aq ON s.station_id = aq.station_id,
+        ${DATASET_WORLDPOP}.${DATASET_WORLDPOP_TABLE_GEOGRID} g LEFT JOIN ${DATASET_WORLDPOP}.${DATASET_WORLDPOP_TABLE_POPULATION} p ON g.geoid = p.geoid 
+        WHERE timeinstant BETWEEN "${timeinstant_from}" AND "${timeinstant_to}"
+        AND ST_CONTAINS(g.geom, s.geom)
+        GROUP BY s.station_id, p.population`
+  };
+  const queryRequester = await getQueryRequester();
+  const { data } = await queryRequester.request<SQLQueryResponse<StationWithAggregatedMeasurement>>(
+    { params }
   );
   return data.rows;
 };
 
-export const getStationMeasurementAggregatedTimeSeries = async () => {};
+/**
+ * UC2: copied from
+ */
+interface GetStationMeasurementAggregatedTimeSerieParams
+  extends GetStationMeasurementAggregatedParams {
+  step: TimeSerieStep;
+}
 
-/*
-      const resp = await axios.post(
-        "https://auth.carto.com/oauth/token",
-        {
-          client_id: process.env.CARTO_CLIENT_ID,
-          client_secret: process.env.CARTO_CLIENT_SECRET,
-          grant_type: "client_credentials",
-          audience: "carto-cloud-native-api",
-        },
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        },
-      );
-      carto_token = resp.data.access_token;
-      */
+export const getStationMeasurementAggregatedTimeSerie = async ({
+  pollutant,
+  aggregate,
+  timeinstant_from,
+  timeinstant_to,
+  step
+}: GetStationMeasurementAggregatedTimeSerieParams): Promise<StationWithAggregatedMeasurement[]> => {
+  const params: SQLQueryParams = {
+    q: `SELECT s.station_id, ${aggregate}(aq.${pollutant}) AS pollutant_aggregated,
+        FROM ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQSTATIONS} s LEFT JOIN ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQMEASUREMENTS} aq ON s.station_id = aq.station_id
+        WHERE timeinstant BETWEEN "${timeinstant_from}" AND "${timeinstant_to}"
+        GROUP BY s.station_id`
+  };
+  const queryRequester = await getQueryRequester();
+  const { data } = await queryRequester.request<SQLQueryResponse<StationWithAggregatedMeasurement>>(
+    { params }
+  );
+  return data.rows;
+};
