@@ -1,4 +1,3 @@
-// TODO: doc project structure + methods
 // TODO: use absolute paths
 import {
   AirQualityPollutant,
@@ -7,7 +6,8 @@ import {
   SQLQueryResponse,
   StationWithAggregatedMeasurement,
   TimeSerieStep,
-  SQLQueryParams
+  SQLQueryParams,
+  ExpirableToken
 } from "../domain";
 
 import {
@@ -21,81 +21,59 @@ import {
 } from "../conf/CartoConf";
 
 import axios, { AxiosInstance } from "axios";
-
 /**
- * Cached Token in memory
+ * Gets an Auth Token to be used on the requests to the Query API.
+ * @returns Auth Token
  */
-let cached_token: Token = null;
-/**
- * Gets an Auth Token to be used on the query api
- * @returns: string
- */
-const getToken = async (): Promise<string> => {
-  // TODO: manage token expiration
-  if (cached_token !== null) {
-    return cached_token.access_token;
-  } else {
-    const client_data = {
-      client_id: process.env.CARTO_CLIENT_ID,
-      client_secret: process.env.CARTO_CLIENT_SECRET,
-      grant_type: "client_credentials",
-      audience: "carto-cloud-native-api"
-    };
-    // TODO: axios o fetch en todas las peticiones
-    const r_auth = await fetch("https://auth.carto.com/oauth/token", {
-      method: "POST",
-      body: new URLSearchParams(client_data),
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      }
-    });
-    cached_token = await r_auth.json();
-    return cached_token.access_token;
-  }
+const getToken = async (): Promise<Token> => {
+  const client_data = {
+    client_id: process.env.CARTO_CLIENT_ID,
+    client_secret: process.env.CARTO_CLIENT_SECRET,
+    grant_type: "client_credentials",
+    audience: "carto-cloud-native-api"
+  };
+  const r_auth = await fetch("https://auth.carto.com/oauth/token", {
+    method: "POST",
+    body: new URLSearchParams(client_data),
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
+  });
+  return await r_auth.json();
 };
-
+/**
+ * Cached Auth Token
+ */
+let auth_token: ExpirableToken = null;
+/**
+ * Axios preconfigured instance to perform requests to Carto's SQL Cloud Platform endpoint.
+ */
 let axiosCartoQueryRequester: AxiosInstance = null;
+/**
+ * Gets Axios preconfigured instance.
+ * If auth_token has expired, requests a new token for the Authorization header and creates a new instance.
+ * @returns New Axios Instance or Cached Axios Instance
+ */
 const getQueryRequester = async () => {
-  if (axiosCartoQueryRequester === null) {
+  if (auth_token === null || auth_token.isExpired()) {
+    auth_token = new ExpirableToken(await getToken());
     axiosCartoQueryRequester = axios.create({
       baseURL: `${GCP_BASE}/v3/sql/carto_dw/query`,
       headers: {
-        Authorization: `Bearer ${await getToken()}`
+        Authorization: `Bearer ${auth_token.access_token}`
       }
     });
   }
   return axiosCartoQueryRequester;
 };
-/*
-const getTokenAxios = async (): Promise<string> => {
-  if (cached_token !== null) {
-    return cached_token.access_token;
-  } else {
-    const client_data = {
-      client_id: process.env.CARTO_CLIENT_ID,
-      client_secret: process.env.CARTO_CLIENT_SECRET,
-      grant_type: "client_credentials",
-      audience: "carto-cloud-native-api"
-    };
-    const { data } = await axios.post<Token>("https://auth.carto.com/oauth/token", client_data, {
-      responseType: "arraybuffer",
-      responseEncoding: "binary",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      }
-    });
-    cached_token = data;
-    return cached_token.access_token;
-  }
-};
-*/
+
 /**
  * @typedef {Object} GetStationMeasurementAggregatedParams
  * @property {AirQualityPollutant} pollutant Pollutant to get measurements from
  * @property {SQLAggregateFunction} aggregate SQL Aggregate function
- * @property {string} timeinstant_from XXXXXXXX
- * @property {string} timeinstant_to XXXXXXXXX
- * XXXXXXXX
+ * @property {string} timeinstant_from Min date of the measurements
+ * @property {string} timeinstant_to Max date of the measurements
+ * Contains all the parameters needed to perform a getStationMeasurementAggregated request
  */
 type GetStationMeasurementAggregatedParams = {
   pollutant: AirQualityPollutant;
@@ -104,10 +82,12 @@ type GetStationMeasurementAggregatedParams = {
   timeinstant_to: string;
 };
 /**
- * Gets a list of stations xxxx
- * @param {GetStationMeasurementAggregatedParams} param - {@link GetStationMeasurementAggregatedParams} object
+ * Gets a list of stations with station_id, request aggregate of the requested pollutant and population affected by the station
+ * filtered by a date range
+ * @param {GetStationMeasurementAggregatedParams} param -- {@link GetStationMeasurementAggregatedParams} object
  * containing all parameters needed to perform the request
- * @returns promise to be fulfilled with an array of XXXXXX
+ * @returns {Promise<StationWithAggregatedMeasurement[]>} Promise object representing
+ * an Array of {@link StationWithAggregatedMeasurement}
  */
 export const getStationMeasurementAggregated = async ({
   pollutant,
@@ -124,36 +104,6 @@ export const getStationMeasurementAggregated = async ({
         GROUP BY s.station_id, p.population`
   };
   const queryRequester = await getQueryRequester();
-  const { data } = await queryRequester.request<SQLQueryResponse<StationWithAggregatedMeasurement>>(
-    { params }
-  );
-  return data.rows;
-};
-
-/**
- * UC2: copied from
- */
-interface GetStationMeasurementAggregatedTimeSerieParams
-  extends GetStationMeasurementAggregatedParams {
-  step: TimeSerieStep;
-}
-
-export const getStationMeasurementAggregatedTimeSerie = async ({
-  pollutant,
-  aggregate,
-  timeinstant_from,
-  timeinstant_to,
-  step
-}: GetStationMeasurementAggregatedTimeSerieParams): Promise<StationWithAggregatedMeasurement[]> => {
-  const params: SQLQueryParams = {
-    q: `SELECT s.station_id, ${aggregate}(aq.${pollutant}) AS pollutant_aggregated,
-        FROM ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQSTATIONS} s LEFT JOIN ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQMEASUREMENTS} aq ON s.station_id = aq.station_id
-        WHERE timeinstant BETWEEN "${timeinstant_from}" AND "${timeinstant_to}"
-        GROUP BY s.station_id`
-  };
-  const queryRequester = await getQueryRequester();
-  const { data } = await queryRequester.request<SQLQueryResponse<StationWithAggregatedMeasurement>>(
-    { params }
-  );
+  const { data } = await queryRequester.request<SQLQueryResponse<StationWithAggregatedMeasurement>>({ params });
   return data.rows;
 };

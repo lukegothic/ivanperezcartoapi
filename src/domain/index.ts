@@ -1,4 +1,5 @@
 export { AirQualityPollutant } from "./AirQualityPollutant";
+export { ExpirableToken, Token } from "./Token";
 export { GeometryPoint } from "./GeometryPoint";
 export { SQLAggregateFunction } from "./SQLAggregateFunction";
 export { SQLQueryParams } from "./SQLQueryParams";
@@ -7,4 +8,3 @@ export { Station } from "./Station";
 export { StationMeasurement } from "./StationMeasurement";
 export { StationWithAggregatedMeasurement } from "./StationWithAggregatedMeasurement";
 export { TimeSerieStep } from "./TimeSerieStep";
-export { Token } from "./Token";
