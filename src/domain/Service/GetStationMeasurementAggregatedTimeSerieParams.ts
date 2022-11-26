@@ -1,6 +1,6 @@
-import { SQLAggregateFunction } from "./SQLAggregateFunction";
-import { AirQualityPollutant } from "./AirQualityPollutant";
-import { TimeSerieStep } from "./TimeSerieStep";
+import { SQLAggregateFunction } from "./domain/SQLAggregateFunction";
+import { AirQualityPollutant } from "./domain/AirQualityPollutant";
+import { TimeSerieStep } from "./domain/TimeSerieStep";
 
 /**
  * @typedef {Object} GetStationMeasurementAggregatedTimeSerieParamsRoute

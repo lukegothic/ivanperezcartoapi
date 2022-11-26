@@ -1,5 +1,5 @@
-import { SQLAggregateFunction } from "./SQLAggregateFunction";
-import { AirQualityPollutant } from "./AirQualityPollutant";
+import { SQLAggregateFunction } from "./domain/SQLAggregateFunction";
+import { AirQualityPollutant } from "./domain/AirQualityPollutant";
 
 /**
  * @typedef {Object} GetStationMeasurementAggregatedParamsRoute
@@ -27,5 +27,4 @@ export type GetStationMeasurementAggregatedParamsQS = {
  * @typedef {Object} GetStationMeasurementAggregatedParams
  * Contains all the parameters needed to perform a getStationMeasurementAggregated request
  */
-export type GetStationMeasurementAggregatedParams = GetStationMeasurementAggregatedParamsRoute &
-  GetStationMeasurementAggregatedParamsQS;
+export type GetStationMeasurementAggregatedParams = GetStationMeasurementAggregatedParamsRoute & GetStationMeasurementAggregatedParamsQS;
