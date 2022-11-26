@@ -1,3 +1,6 @@
+// index.ts
+// Enables easy importing of all the types, interfaces and classes present in this folder
+// To import any of them, it is just needed to point to the ./domain folder
 export { AirQualityPollutant } from "./AirQualityPollutant";
 export { ExpirableToken, Token } from "./Token";
 export { GeometryPoint } from "./GeometryPoint";
