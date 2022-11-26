@@ -26,6 +26,8 @@ Assignment: Create a public API (nodejs, typescript) with the following endpoint
   pollutant_aggregate,
   population (n of people that live inside the grid the station is placed in) (number, perform spatial join with wp_population_8d42d536)
   }]
+  Sample query: SELECT s.station_id, avg(aq.co) AS pollutant_aggregated, p.population FROM cartodb-gcp-backend-data-team.code_test.airquality_stations s LEFT JOIN cartodb-gcp-backend-data-team.code_test.airquality_measurements aq ON s.station_id = aq.station_id, carto-data.ac_1uzlc7pq.sub_worldpop_geography_esp_grid100m_v1 g LEFT JOIN carto-data.ac_1uzlc7pq.sub_worldpop_demographics_population_esp_grid100m_v1_yearly_2010 p ON g.geoid = p.geoid WHERE timeinstant BETWEEN \"2015-12-11T00:30:00.000Z\" AND \"2016-12-20T11:30:00.000Z\" AND ST_CONTAINS(g.geom, s.geom) GROUP BY s.station_id, p.population
+
 - Time-series
   PARAMETERS:
   Time range to filter by (date_from, date_to) (datetimes, send as a where clause)

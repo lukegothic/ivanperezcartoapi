@@ -1,16 +1,25 @@
+import {
+  GetStationMeasurementAggregatedParams,
+  GetStationMeasurementAggregatedParamsRoute,
+  GetStationMeasurementAggregatedParamsQS
+} from "./domain";
 import { getStationMeasurementAggregated } from "./services/CartoService";
-import { GetStationMeasurementAggregatedParams } from "./domain";
 import express, { Request } from "express";
 
 const app = express();
 const cartoRouter = express.Router();
 
-// TODO: decide on full route path vs route and querystring for dates
 cartoRouter
-  .route("/measurements/:pollutant/aggregate/:aggregate/:timeinstant_from/:timeinstant_to")
-  .get(async (req: Request<GetStationMeasurementAggregatedParams>, res) => {
-    res.json(await getStationMeasurementAggregated(req.params));
-  });
+  .route("/measurements/:pollutant")
+  .get(
+    async (
+      req: Request<GetStationMeasurementAggregatedParamsRoute, any, any, GetStationMeasurementAggregatedParamsQS>,
+      res
+    ) => {
+      const params: GetStationMeasurementAggregatedParams = Object.assign({}, req.params, req.query);
+      res.json(await getStationMeasurementAggregated(params));
+    }
+  );
 
 app.use("/", cartoRouter);
 

@@ -77,14 +77,14 @@ const getQueryRequester = async () => {
 export const getStationMeasurementAggregated = async ({
   pollutant,
   aggregate,
-  timeinstant_from,
-  timeinstant_to
+  datetime_start,
+  datetime_end
 }: GetStationMeasurementAggregatedParams): Promise<StationWithAggregatedMeasurement[]> => {
   const params: SQLQueryParams = {
     q: `SELECT s.station_id, ${aggregate}(aq.${pollutant}) AS pollutant_aggregated, p.population
         FROM ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQSTATIONS} s LEFT JOIN ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQMEASUREMENTS} aq ON s.station_id = aq.station_id,
         ${DATASET_WORLDPOP}.${DATASET_WORLDPOP_TABLE_GEOGRID} g LEFT JOIN ${DATASET_WORLDPOP}.${DATASET_WORLDPOP_TABLE_POPULATION} p ON g.geoid = p.geoid 
-        WHERE timeinstant BETWEEN "${timeinstant_from}" AND "${timeinstant_to}"
+        WHERE timeinstant BETWEEN "${datetime_start}" AND "${datetime_end}"
         AND ST_CONTAINS(g.geom, s.geom)
         GROUP BY s.station_id, p.population`
   };
