@@ -1,4 +1,5 @@
 export type StationWithAggregatedMeasurement = {
   station_id: string;
-  aggr: number;
+  pollutant_aggregated: number;
+  population: number;
 };
