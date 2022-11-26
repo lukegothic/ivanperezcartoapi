@@ -2,12 +2,12 @@
   "name": "api",
   "version": "1.0.0",
   "description": "My test API for Carto",
-  "main": "index.ts",
+  "main": "api.ts",
   "scripts": {
     "test": "test",
     "lint": "eslint . --ext .ts",
-    "start": "ts-node src/index.ts",
-    "start-dev": "nodemon src/index.ts"
+    "start": "ts-node src/api.ts",
+    "start-dev": "nodemon src/api.ts"
   },
   "repository": {
     "type": "git",

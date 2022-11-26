@@ -1,9 +1,12 @@
 import {
   GetStationMeasurementAggregatedParams,
   GetStationMeasurementAggregatedParamsRoute,
-  GetStationMeasurementAggregatedParamsQS
+  GetStationMeasurementAggregatedParamsQS,
+  GetStationMeasurementAggregatedTimeSerieParams,
+  GetStationMeasurementAggregatedTimeSerieParamsRoute,
+  GetStationMeasurementAggregatedTimeSerieParamsQS
 } from "./domain";
-import { getStationMeasurementAggregated } from "./services/CartoService";
+import { getStationMeasurementAggregated, getStationMeasurementAggregatedTimeSerie } from "./services/CartoService";
 import express, { Request } from "express";
 
 const app = express();
@@ -18,6 +21,23 @@ cartoRouter
     ) => {
       const params: GetStationMeasurementAggregatedParams = Object.assign({}, req.params, req.query);
       res.json(await getStationMeasurementAggregated(params));
+    }
+  );
+
+cartoRouter
+  .route("/timeserie/:pollutant")
+  .get(
+    async (
+      req: Request<
+        GetStationMeasurementAggregatedTimeSerieParamsRoute,
+        any,
+        any,
+        GetStationMeasurementAggregatedTimeSerieParamsQS
+      >,
+      res
+    ) => {
+      const params: GetStationMeasurementAggregatedTimeSerieParams = Object.assign({}, req.params, req.query);
+      res.json(await getStationMeasurementAggregatedTimeSerie(params));
     }
   );
 

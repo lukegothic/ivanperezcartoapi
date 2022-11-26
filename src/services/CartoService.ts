@@ -3,7 +3,10 @@ import {
   Token,
   SQLQueryResponse,
   StationWithAggregatedMeasurement,
+  StationWithAggregatedMeasurementTimeSerie,
+  StationWithAggregatedMeasurementTimeSerieResponse,
   GetStationMeasurementAggregatedParams,
+  GetStationMeasurementAggregatedTimeSerieParams,
   TimeSerieStep,
   SQLQueryParams,
   ExpirableToken
@@ -19,6 +22,8 @@ import {
   DATASET_WORLDPOP_TABLE_POPULATION
 } from "../conf/CartoConf";
 
+import { groupStationMeasurementDataByStation } from "./utils/StationMeasurementsTimeSerie";
+import { TIMEPARTS_MAP } from "./utils/TimeSerieStep";
 import axios, { AxiosInstance } from "axios";
 /**
  * Gets an Auth Token to be used on the requests to the Query API.
@@ -91,4 +96,32 @@ export const getStationMeasurementAggregated = async ({
   const queryRequester = await getQueryRequester();
   const { data } = await queryRequester.request<SQLQueryResponse<StationWithAggregatedMeasurement>>({ params });
   return data.rows;
+};
+
+/**
+ * Gets a list of stations with station_id and a array of measurements grouped by timepart
+ * filtered by a date range
+ * @param {GetStationMeasurementAggregatedTimeSerieParams} param -- {@link GetStationMeasurementAggregatedTimeSerieParams} object
+ * containing all parameters needed to perform the request
+ * @returns {Promise<StationWithAggregatedMeasurementTimeSerie[]>} Promise object representing
+ * an Array of {@link StationWithAggregatedMeasurementTimeSerie}
+ */
+export const getStationMeasurementAggregatedTimeSerie = async ({
+  pollutant,
+  aggregate,
+  datetime_start,
+  datetime_end,
+  step
+}: GetStationMeasurementAggregatedTimeSerieParams): Promise<StationWithAggregatedMeasurementTimeSerieResponse[]> => {
+  const stepTimeParts = TIMEPARTS_MAP[step];
+  const params: SQLQueryParams = {
+    q: `SELECT s.station_id, ${aggregate}(aq.${pollutant}) AS pollutant_aggregated, 
+        ${stepTimeParts.map((stp) => `EXTRACT(${stp} FROM CAST (aq.timeinstant AS TIMESTAMP)) AS ${stp}`).join(", ")}
+        FROM ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQSTATIONS} s LEFT JOIN ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQMEASUREMENTS} aq ON s.station_id = aq.station_id
+        WHERE timeinstant BETWEEN "${datetime_start}" AND "${datetime_end}"
+        GROUP BY s.station_id, ${stepTimeParts.join(", ")} ORDER BY s.station_id, ${stepTimeParts.join(", ")}`
+  };
+  const queryRequester = await getQueryRequester();
+  const { data } = await queryRequester.request<SQLQueryResponse<StationWithAggregatedMeasurementTimeSerie>>({ params });
+  return groupStationMeasurementDataByStation(data.rows);
 };
