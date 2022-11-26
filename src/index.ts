@@ -1,20 +1,16 @@
-import { AirQualityPollutant, SQLAggregateFunction, TimeSerieStep } from "./domain";
 import { getStationMeasurementAggregated } from "./services/CartoService";
-import express from "express";
+import { GetStationMeasurementAggregatedParams } from "./domain";
+import express, { Request } from "express";
 
 const app = express();
 const cartoRouter = express.Router();
 
-cartoRouter.route("/measure").get(async (req, res) => {
-  res.json(
-    await getStationMeasurementAggregated({
-      pollutant: AirQualityPollutant.SO2,
-      aggregate: SQLAggregateFunction.AVG,
-      timeinstant_from: "2016-12-11 10:30:00",
-      timeinstant_to: "2016-12-11 11:30:00"
-    })
-  );
-});
+// TODO: decide on full route path vs route and querystring for dates
+cartoRouter
+  .route("/measurements/:pollutant/aggregate/:aggregate/:timeinstant_from/:timeinstant_to")
+  .get(async (req: Request<GetStationMeasurementAggregatedParams>, res) => {
+    res.json(await getStationMeasurementAggregated(req.params));
+  });
 
 app.use("/", cartoRouter);
 

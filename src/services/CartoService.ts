@@ -1,10 +1,9 @@
 // TODO: use absolute paths
 import {
-  AirQualityPollutant,
   Token,
-  SQLAggregateFunction,
   SQLQueryResponse,
   StationWithAggregatedMeasurement,
+  GetStationMeasurementAggregatedParams,
   TimeSerieStep,
   SQLQueryParams,
   ExpirableToken
@@ -67,20 +66,6 @@ const getQueryRequester = async () => {
   return axiosCartoQueryRequester;
 };
 
-/**
- * @typedef {Object} GetStationMeasurementAggregatedParams
- * @property {AirQualityPollutant} pollutant Pollutant to get measurements from
- * @property {SQLAggregateFunction} aggregate SQL Aggregate function
- * @property {string} timeinstant_from Min date of the measurements
- * @property {string} timeinstant_to Max date of the measurements
- * Contains all the parameters needed to perform a getStationMeasurementAggregated request
- */
-type GetStationMeasurementAggregatedParams = {
-  pollutant: AirQualityPollutant;
-  aggregate: SQLAggregateFunction;
-  timeinstant_from: string;
-  timeinstant_to: string;
-};
 /**
  * Gets a list of stations with station_id, request aggregate of the requested pollutant and population affected by the station
  * filtered by a date range
