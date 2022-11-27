@@ -35,19 +35,16 @@ const getToken = async (): Promise<Token> => {
    * I've chosen to keep and read them from environment variables
    * client_id is read from CARTO_CLIENT_ID and client_secret is read from CARTO_CLIENT_SECRET
    */
-  const r_auth = await fetch(OAUTH_ENDPOINT, {
-    method: "POST",
-    body: new URLSearchParams({
+  const { data } = await axios.post<Token>(
+    OAUTH_ENDPOINT,
+    new URLSearchParams({
       client_id: process.env.CARTO_CLIENT_ID,
       client_secret: process.env.CARTO_CLIENT_SECRET,
       grant_type: OAUTH_CREDENTIAL_TYPE,
       audience: "carto-cloud-native-api"
-    }),
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    }
-  });
-  return await r_auth.json();
+    })
+  );
+  return data;
 };
 /**
  * Cached Auth Token
