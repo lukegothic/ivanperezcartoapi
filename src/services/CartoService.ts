@@ -23,7 +23,7 @@ import {
 } from "../conf/CartoConf";
 
 import { groupStationMeasurementDataByStation } from "./utils/StationMeasurementsTimeSerie";
-import { DateTimeParts } from "./utils/TimeSerieStep";
+import { TimePartsForGrouping } from "./utils/TimeSerieStep";
 import axios, { AxiosInstance } from "axios";
 /**
  * Gets an Auth Token to be used on the requests to the Query API.
@@ -128,7 +128,7 @@ export const getStationMeasurementAggregatedTimeSerie = async ({
    * Each step type has an array of dependencies for the grouping of data to be able to work properly
    * for example: "week" step needs the grouping to be done by year and by week
    */
-  const stepDateTimeParts = DateTimeParts.get(step);
+  const stepTimePartsForGrouping = TimePartsForGrouping.get(step);
   /**
    * By knowing the array of dependencies enables us to only request, group and order the data just by the needed datetime parts
    * In detail, each date part affects how many EXTRACT, GROUP BY and ORDER BY are generated on the query,
@@ -137,10 +137,10 @@ export const getStationMeasurementAggregatedTimeSerie = async ({
    */
   const params: SQLQueryParams = {
     q: `SELECT s.station_id, ${aggregate}(aq.${pollutant}) AS pollutant_aggregated, 
-        ${stepDateTimeParts.map((sdtp) => `EXTRACT(${sdtp} FROM CAST (aq.timeinstant AS TIMESTAMP)) AS ${sdtp}`).join(", ")}
+        ${stepTimePartsForGrouping.map((stpfg) => `EXTRACT(${stpfg} FROM CAST (aq.timeinstant AS TIMESTAMP)) AS ${stpfg}`).join(", ")}
         FROM ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQSTATIONS} s LEFT JOIN ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQMEASUREMENTS} aq ON s.station_id = aq.station_id
         WHERE timeinstant BETWEEN "${datetime_start}" AND "${datetime_end}"
-        GROUP BY s.station_id, ${stepDateTimeParts.join(", ")} ORDER BY s.station_id, ${stepDateTimeParts.join(", ")}`
+        GROUP BY s.station_id, ${stepTimePartsForGrouping.join(", ")} ORDER BY s.station_id, ${stepTimePartsForGrouping.join(", ")}`
   };
   const queryRequester = await getQueryRequester();
   const { data } = await queryRequester.request<SQLQueryResponse<StationWithAggregatedMeasurementTimeSerie>>({ params });

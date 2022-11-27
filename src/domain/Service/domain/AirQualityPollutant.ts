@@ -1,3 +1,7 @@
+/**
+ * Enum for pollutant types
+ * @enum {string}
+ */
 export enum AirQualityPollutant {
   SO2 = "so2",
   NO2 = "no2",

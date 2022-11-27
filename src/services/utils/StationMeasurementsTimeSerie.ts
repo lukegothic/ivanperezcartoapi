@@ -1,7 +1,9 @@
 import { StationWithAggregatedMeasurementTimeSerie, StationWithAggregatedMeasurementTimeSerieResponse } from "../../domain";
 /**
- * @params {StationWithAggregatedMeasurementTimeSerie[]} rows
- * @returns
+ * @param {StationWithAggregatedMeasurementTimeSerie[]} rows Unarranged rows with station, measurement and time
+ * @returns {StationWithAggregatedMeasurementTimeSerieResponse[]}
+ * Arranges station data so it ends up only needing one row of data for each station
+ * and aggregates all the measurement data, both the aggregated value and its datetime part components inside a measurements array
  */
 export const groupStationMeasurementDataByStation = (
   rows: StationWithAggregatedMeasurementTimeSerie[]
