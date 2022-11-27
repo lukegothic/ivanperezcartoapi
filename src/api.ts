@@ -1,3 +1,6 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 import {
   GetStationMeasurementAggregatedParams,
   GetStationMeasurementAggregatedParamsRoute,
@@ -7,6 +10,7 @@ import {
   GetStationMeasurementAggregatedTimeSerieParamsQS
 } from "./domain";
 import { getStationMeasurementAggregated, getStationMeasurementAggregatedTimeSerie } from "./services/CartoService";
+
 import express, { Request } from "express";
 
 /**
