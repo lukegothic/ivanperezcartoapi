@@ -1,5 +1,5 @@
-import { SQLAggregateFunction } from "./domain/SQLAggregateFunction";
-import { AirQualityPollutant } from "./domain/AirQualityPollutant";
+import { SQLAggregateFunction } from "../../domains/SQLAggregateFunction";
+import { AirQualityPollutant } from "../../domains/AirQualityPollutant";
 
 /**
  * @typedef {Object} GetStationMeasurementAggregatedParamsRoute

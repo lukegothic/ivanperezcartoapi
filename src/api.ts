@@ -7,12 +7,10 @@ import {
   GetStationMeasurementAggregatedParamsQS,
   GetStationMeasurementAggregatedTimeSerieParams,
   GetStationMeasurementAggregatedTimeSerieParamsRoute,
-  GetStationMeasurementAggregatedTimeSerieParamsQS,
-  SQLAggregateFunction,
-  AirQualityPollutant,
-  TimeSerieStep
-} from "./domain";
+  GetStationMeasurementAggregatedTimeSerieParamsQS
+} from "./models";
 import { getStationMeasurementAggregated, getStationMeasurementAggregatedTimeSerie } from "./services/CartoService";
+import { SQLAggregateFunction, AirQualityPollutant, TimeSerieStep } from "./domains";
 
 import { check, param, query, validationResult } from "express-validator";
 import express, { Request } from "express";
@@ -44,10 +42,10 @@ cartoRouter
   .get(
     // Perform validation on params and querystring
     [
-      param("pollutant").isIn(Object.values(AirQualityPollutant)),
-      query("aggregate").exists().isIn(Object.values(SQLAggregateFunction)),
-      query("datetime_start").exists().isISO8601(),
-      query("datetime_end").exists().isISO8601()
+      param("pollutant").trim().isIn(Object.values(AirQualityPollutant)),
+      query("aggregate").exists().trim().isIn(Object.values(SQLAggregateFunction)),
+      query("datetime_start").exists().trim().isISO8601(),
+      query("datetime_end").exists().trim().isISO8601()
     ],
     // The any types here are because we don't care about the ResBody, ReqBody or Res
     async (req: Request<GetStationMeasurementAggregatedParamsRoute, any, any, GetStationMeasurementAggregatedParamsQS>, res: any) => {
@@ -81,11 +79,11 @@ cartoRouter
   .get(
     // Perform validation on params and querystring
     [
-      param("pollutant").isIn(Object.values(AirQualityPollutant)),
-      query("aggregate").exists().isIn(Object.values(SQLAggregateFunction)),
-      query("datetime_start").exists().isISO8601(),
-      query("datetime_end").exists().isISO8601(),
-      query("step").exists().isIn(Object.values(TimeSerieStep))
+      param("pollutant").trim().isIn(Object.values(AirQualityPollutant)),
+      query("aggregate").exists().trim().isIn(Object.values(SQLAggregateFunction)),
+      query("datetime_start").exists().trim().isISO8601(),
+      query("datetime_end").exists().trim().isISO8601(),
+      query("step").exists().trim().isIn(Object.values(TimeSerieStep))
     ],
     async (
       req: Request<GetStationMeasurementAggregatedTimeSerieParamsRoute, any, any, GetStationMeasurementAggregatedTimeSerieParamsQS>,

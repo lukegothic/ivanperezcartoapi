@@ -1,4 +1,4 @@
-import { StationWithAggregatedMeasurementTimeSerie, StationWithAggregatedMeasurementTimeSerieResponse } from "../../domain";
+import { StationWithAggregatedMeasurementTimeSerie, StationWithAggregatedMeasurementTimeSerieResponse } from "../../models";
 /**
  * @param {StationWithAggregatedMeasurementTimeSerie[]} rows Unarranged rows with station, measurement and time
  * @returns {StationWithAggregatedMeasurementTimeSerieResponse[]}

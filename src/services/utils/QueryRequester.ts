@@ -1,5 +1,5 @@
 import { GCP_BASE, OAUTH_ENDPOINT, OAUTH_CREDENTIAL_TYPE } from "../../conf/CartoConf";
-import { Token, ExpirableToken } from "../../domain";
+import { Token, ExpirableToken } from "../../models";
 import axios, { AxiosInstance } from "axios";
 /**
  * Gets an Auth Token to be used on the requests to the Query API.

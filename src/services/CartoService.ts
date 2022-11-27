@@ -6,7 +6,7 @@ import {
   StationWithAggregatedMeasurementTimeSerieResponse,
   GetStationMeasurementAggregatedParams,
   GetStationMeasurementAggregatedTimeSerieParams
-} from "../domain";
+} from "../models";
 
 import {
   DATASET_CODETEST,

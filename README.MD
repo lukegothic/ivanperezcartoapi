@@ -9,13 +9,13 @@ This project uses the following open source projects to work properly:
 - [node.js] - evented I/O for the backend
 - [Express] - fast node.js network app framework
 - [axios] - promise based HTTP client for node.js
-- [mocha] - testing framework
+- [mocha] & [chai] - testing framework
 
 The project itself on [github][public-repo].
 
 ## Installation
 
-This project requires [Node.js](https://nodejs.org/) v10+ to run.
+This project requires [Node.js][node.js] v10+ to run.
 
 Download or clone the [repository][git-repo-url].
 
@@ -35,7 +35,7 @@ npm install
 npm start
 ```
 
-To run tests.
+To run tests (be sure that api is running!)
 
 ```sh
 npm test
@@ -142,7 +142,7 @@ Once I got the token and was able to perform queries, I built a query requester,
 Then, for each of the proposed Use Cases, my workflow iteration was as follows:
 
 - Build the query inside POSTMAN until I came with the expected results.
-- Write Typescript types, interfaces or classes needed to both receive the parameters needed for the query and the results of running the query. If a new domain of data was needed, I'd create a new enum.
+- Write Typescript types, interfaces or classes needed to model both receive the parameters needed for the query and the results of running the query. If a new domain of data was needed, I'd create a new enum.
 - Code the service part of the solution. Retrieve data using the query requester, and transform data if needed.
 - Add a custom endpoint to the api to expose the service part.
 - (optional) Put tests in place to test for both breaking and non-breaking use cases of the current endpoint.
@@ -151,7 +151,7 @@ Then, for each of the proposed Use Cases, my workflow iteration was as follows:
 
 As time was constrained, I purposely left tests out to be implemented afterwards. But building tests should always be inside the workflow iteration.
 
-After having both Use Cases up and running, I spent some time thoroughly documenting all the code and the queries. Also, now having the whole picture of the project in place, it was time to perform the last big refactor taking into account all the parts of the solution, mostly rearranging constants, domains and types and sorting common code together.
+After having both Use Cases up and running, I spent some time thoroughly documenting all the code and the queries. Also, now having the whole picture of the project in place, it was time to perform the last big refactor taking into account all the parts of the solution, mostly rearranging constants, domains and models and sorting common code together.
 
 > That's all.
 > Feel free to contact me on any aclaration needed on the provided solution and code. It's been a pleasure working with the Carto platform.
@@ -163,6 +163,7 @@ After having both Use Cases up and running, I spent some time thoroughly documen
 [myself]: https://github.com/lukegothic
 [node.js]: http://nodejs.org
 [express]: http://expressjs.com
-[axios]: https://axios-http.com/docs/intro
-[mocha]: https://mochajs.org/
+[axios]: https://axios-http.com
+[mocha]: https://mochajs.org
+[chai]: https://www.chaijs.com
 [carto-dev]: https://pinea.app.carto.com/developers

@@ -1,4 +1,4 @@
-import { TimeSerieStep } from "../../domain";
+import { TimeSerieStep } from "../../domains";
 
 /**
  * Map containing the relation between a TimeSerieStep and the TimeSerieStep dependencies
