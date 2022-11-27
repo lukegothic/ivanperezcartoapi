@@ -2,11 +2,12 @@ INSTALLATION
 
 run the command: npm install
 create new application at https://pinea.app.carto.com/developers
-create .env file with: env var (2)
-get Client ID from application
+after creating the application, create .env file at the folder root with the following contents:
+CARTO_CLIENT_ID = "<your_cartoapp_client_id>"
+CARTO_CLIENT_SECRET = "<your_cartoapp_client_secret>"
 
 run the api with the command: npm start (api will start on port 3003)
-run tests with the command: npm test
+launch api tests with the command: npm test
 
 REQUIREMENTS
 
