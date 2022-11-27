@@ -23,7 +23,7 @@ import {
 } from "../conf/CartoConf";
 
 import { groupStationMeasurementDataByStation } from "./utils/StationMeasurementsTimeSerie";
-import { DATETIMEPARTS_MAP } from "./utils/TimeSerieStep";
+import { DateTimeParts } from "./utils/TimeSerieStep";
 import axios, { AxiosInstance } from "axios";
 /**
  * Gets an Auth Token to be used on the requests to the Query API.
@@ -131,7 +131,7 @@ export const getStationMeasurementAggregatedTimeSerie = async ({
    * Each step type has an array of dependencies for the grouping of data to be able to work properly
    * for example: "week" step needs the grouping to be done by year and by week
    */
-  const stepDateTimeParts = DATETIMEPARTS_MAP[step];
+  const stepDateTimeParts = DateTimeParts.get(step);
   /**
    * By knowing the array of dependencies enables us to only request, group and order the data just by the needed datetime parts
    * In detail, each date part affects how many EXTRACT, GROUP BY and ORDER BY are generated on the query,
