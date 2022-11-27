@@ -5,73 +5,21 @@ import {
   StationWithAggregatedMeasurementTimeSerie,
   StationWithAggregatedMeasurementTimeSerieResponse,
   GetStationMeasurementAggregatedParams,
-  GetStationMeasurementAggregatedTimeSerieParams,
-  Token,
-  ExpirableToken
+  GetStationMeasurementAggregatedTimeSerieParams
 } from "../domain";
 
 import {
-  GCP_BASE,
   DATASET_CODETEST,
   DATASET_CODETEST_TABLE_AQMEASUREMENTS,
   DATASET_CODETEST_TABLE_AQSTATIONS,
   DATASET_WORLDPOP,
   DATASET_WORLDPOP_TABLE_GEOGRID,
-  DATASET_WORLDPOP_TABLE_POPULATION,
-  OAUTH_ENDPOINT,
-  OAUTH_CREDENTIAL_TYPE
+  DATASET_WORLDPOP_TABLE_POPULATION
 } from "../conf/CartoConf";
 
 import { groupStationMeasurementDataByStation } from "./utils/StationMeasurementsTimeSerie";
 import { TimePartsForGrouping } from "./utils/TimeSerieStep";
-import axios, { AxiosInstance } from "axios";
-/**
- * Gets an Auth Token to be used on the requests to the Query API.
- * @returns Auth Token
- */
-const getToken = async (): Promise<Token> => {
-  /**
-   * To be able to access data that must be kept private,
-   * I've chosen to keep and read them from environment variables
-   * client_id is read from CARTO_CLIENT_ID and client_secret is read from CARTO_CLIENT_SECRET
-   */
-  const { data } = await axios.post<Token>(
-    OAUTH_ENDPOINT,
-    new URLSearchParams({
-      client_id: process.env.CARTO_CLIENT_ID,
-      client_secret: process.env.CARTO_CLIENT_SECRET,
-      grant_type: OAUTH_CREDENTIAL_TYPE,
-      audience: "carto-cloud-native-api"
-    })
-  );
-  return data;
-};
-/**
- * Cached Auth Token
- */
-let auth_token: ExpirableToken = null;
-/**
- * Axios preconfigured instance to perform requests to Carto's SQL Cloud Platform endpoint.
- */
-let axiosCartoQueryRequester: AxiosInstance = null;
-/**
- * Set-up and get an Axios preconfigured instance.
- * If auth_token has expired, requests a new token for the Authorization header and creates a new instance.
- * @returns New Axios Instance or Cached Axios Instance
- */
-const getQueryRequester = async () => {
-  if (auth_token === null || auth_token.isExpired()) {
-    auth_token = new ExpirableToken(await getToken());
-    axiosCartoQueryRequester = axios.create({
-      baseURL: `${GCP_BASE}/v3/sql/carto_dw/query`,
-      headers: {
-        Authorization: `Bearer ${auth_token.access_token}`
-      }
-    });
-  }
-  return axiosCartoQueryRequester;
-};
-
+import { getQueryRequester } from "./utils/QueryRequester";
 /**
  * Gets a list of stations with station_id, request aggregate of the requested pollutant and population affected by the station
  * filtered by a date range
