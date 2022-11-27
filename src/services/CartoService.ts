@@ -96,6 +96,7 @@ export const getStationMeasurementAggregated = async ({
    * Since we have a spatial component inside the Stations table we are able to spatial-join with the Spatial Grid table
    * using the spatial Function ST_CONTAINS, and then since the spatial table and the population tables are related, we have access to the population data.
    */
+  // NOTE: Query split into multiple lines for clarity
   const params: SQLQueryParams = {
     q: `SELECT s.station_id, ${aggregate}(aq.${pollutant}) AS pollutant_aggregated, p.population
         FROM ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQSTATIONS} s LEFT JOIN ${DATASET_CODETEST}.${DATASET_CODETEST_TABLE_AQMEASUREMENTS} aq ON s.station_id = aq.station_id,
@@ -135,6 +136,7 @@ export const getStationMeasurementAggregatedTimeSerie = async ({
    * so this helps it to be as optimized as possible.
    * Without it, we would have to include every datetime part and then post-process the response to include only the relevant fields
    */
+  // NOTE: Query split into multiple lines for clarity
   const params: SQLQueryParams = {
     q: `SELECT s.station_id, ${aggregate}(aq.${pollutant}) AS pollutant_aggregated, 
         ${stepTimePartsForGrouping.map((stpfg) => `EXTRACT(${stpfg} FROM CAST (aq.timeinstant AS TIMESTAMP)) AS ${stpfg}`).join(", ")}

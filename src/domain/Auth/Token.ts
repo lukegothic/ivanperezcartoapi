@@ -2,13 +2,13 @@
  * Class that contains all the properties of the Token received from the auth request
  */
 export class Token {
-  /** @type {string} XXXX */
+  /** @type {string} The token */
   access_token: string;
-  /** @type {string} XXXX */
+  /** @type {string} Scope list in which the token can be used */
   scope: string;
-  /** @type {number} Token expiration time (in seconds) */
+  /** @type {number} Expiration time (in seconds) */
   expires_in: number;
-  /** @type {string} XXXX */
+  /** @type {string} Type of the token */
   token_type: string;
 
   constructor({ access_token, scope, expires_in, token_type }: Token) {

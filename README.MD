@@ -1,9 +1,10 @@
-Installation
+INSTALLATION
+
 npm i
 env var (2)
 npm start (will start on port 3003)
 
-Problem Analysis
+REQUIREMENTS
 
 API to analyze AQ of a region in Madrid
 
@@ -33,7 +34,8 @@ Assignment: Create a public API (nodejs, typescript) with the following endpoint
   pollutant_aggregate,
   population (n of people that live inside the grid the station is placed in) (number, perform spatial join with wp_population_8d42d536)
   }]
-  Sample query: SELECT s.station_id, avg(aq.co) AS pollutant_aggregated, p.population FROM cartodb-gcp-backend-data-team.code_test.airquality_stations s LEFT JOIN cartodb-gcp-backend-data-team.code_test.airquality_measurements aq ON s.station_id = aq.station_id, carto-data.ac_1uzlc7pq.sub_worldpop_geography_esp_grid100m_v1 g LEFT JOIN carto-data.ac_1uzlc7pq.sub_worldpop_demographics_population_esp_grid100m_v1_yearly_2010 p ON g.geoid = p.geoid WHERE timeinstant BETWEEN "2015-12-11T00:30:00.000Z" AND "2016-12-20T11:30:00.000Z" AND ST_CONTAINS(g.geom, s.geom) GROUP BY s.station_id, p.population
+  Sample query:
+  SELECT s.station_id, avg(aq.co) AS pollutant_aggregated, p.population FROM cartodb-gcp-backend-data-team.code_test.airquality_stations s LEFT JOIN cartodb-gcp-backend-data-team.code_test.airquality_measurements aq ON s.station_id = aq.station_id, carto-data.ac_1uzlc7pq.sub_worldpop_geography_esp_grid100m_v1 g LEFT JOIN carto-data.ac_1uzlc7pq.sub_worldpop_demographics_population_esp_grid100m_v1_yearly_2010 p ON g.geoid = p.geoid WHERE timeinstant BETWEEN "2015-12-11T00:30:00.000Z" AND "2016-12-20T11:30:00.000Z" AND ST_CONTAINS(g.geom, s.geom) GROUP BY s.station_id, p.population
 
 - Time-series
   PARAMETERS:
@@ -43,9 +45,12 @@ Assignment: Create a public API (nodejs, typescript) with the following endpoint
   Step (1 week, 1 day, 1 hour) (TYPE, send as group by)
   OUTPUT:
   Array of stations with the following data: [{
-  station_id: TYPE(time/value)[]
+  station_id,
+  measurements: Array of (time/value)
   }]
-  Sample query: TODO
+
+  Sample query:
+  SELECT s.station_id, avg(aq.co) AS pollutant_aggregated, EXTRACT(year FROM CAST (aq.timeinstant AS TIMESTAMP)) AS year, EXTRACT(week FROM CAST (aq.timeinstant AS TIMESTAMP)) AS week FROM cartodb-gcp-backend-data-team.code_test.airquality_stations s LEFT JOIN cartodb-gcp-backend-data-team.code_test.airquality_measurements aq ON s.station_id = aq.station_id WHERE timeinstant BETWEEN "2016-11-14T01:00:00.000Z" AND "2016-11-30T22:30:00.000Z" GROUP BY s.station_id, year, week ORDER BY s.station_id, year, week
 
   Include tests inside code.
   Develop a simple frontend with Builder: https://pinea.app.carto.com/maps
