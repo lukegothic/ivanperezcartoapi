@@ -19,7 +19,7 @@ This project requires [Node.js](https://nodejs.org/) v10+ to run.
 
 Download or clone the [repository][git-repo-url].
 
-Create new application at [Your Carto's Developers Workspace][carto-dev]
+Create a new application at [Your Carto's Developers Workspace][carto-dev]
 After creating the application, create an .env file at the project root with the following contents:
 
 ```sh
@@ -123,7 +123,7 @@ An array of stations with measurement data aggregated by the provided aggregator
 | station_id   | string | Station Code          |
 | measurements | Array  | Array of measurements |
 
-Each element on the measurement array always has the **Aggregated value** as in Use Case 1, and then a number of datetime components based on the requested step grouping strategy.
+Each element on the measurements array always has the **pollutant_aggregated** field as in Use Case 1, and then a number of datetime components based on the requested step grouping strategy.
 
 | STEP  | YEAR | MONTH | WEEK | DAY | HOUR |
 | ----- | ---- | ----- | ---- | --- | ---- |
