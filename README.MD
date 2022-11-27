@@ -149,7 +149,7 @@ Then, for each of the proposed Use Cases, my workflow iteration was as follows:
 - Provide, at least, minimum documentation on the main parts of the code.
 - Refactor and clean-up code.
 
-As time was constrained, I purposely left tests out to be implemented afterwards. But building tests should always be inside the workflow iteration.
+As time was constrained, I purposely left tests out of the workflow iterations to be implemented afterwards. In my day-to-day, building tests are always inside the workflow iteration.
 
 After having both Use Cases up and running, I spent some time thoroughly documenting all the code and the queries. Also, now having the whole picture of the project in place, it was time to perform the last big refactor taking into account all the parts of the solution, mostly rearranging constants, domains and models and sorting common code together.
 
