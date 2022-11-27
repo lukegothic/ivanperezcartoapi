@@ -7,10 +7,14 @@ import {
   GetStationMeasurementAggregatedParamsQS,
   GetStationMeasurementAggregatedTimeSerieParams,
   GetStationMeasurementAggregatedTimeSerieParamsRoute,
-  GetStationMeasurementAggregatedTimeSerieParamsQS
+  GetStationMeasurementAggregatedTimeSerieParamsQS,
+  SQLAggregateFunction,
+  AirQualityPollutant,
+  TimeSerieStep
 } from "./domain";
 import { getStationMeasurementAggregated, getStationMeasurementAggregatedTimeSerie } from "./services/CartoService";
 
+import { check, param, query, validationResult } from "express-validator";
 import express, { Request } from "express";
 
 /**
@@ -37,13 +41,26 @@ const cartoRouter = express.Router();
 cartoRouter
   .route("/measurements/:pollutant")
   // Set-up the request to handle router params and query string params using our types
-  // Both the any types here are because we don't care about the ResBody or ReqBody
-  .get(async (req: Request<GetStationMeasurementAggregatedParamsRoute, any, any, GetStationMeasurementAggregatedParamsQS>, res) => {
-    // Merge both route params and query string params into a new object with all the data
-    const params: GetStationMeasurementAggregatedParams = Object.assign({}, req.params, req.query);
-    // Call the service with the request params and return the response to the client as json
-    res.json(await getStationMeasurementAggregated(params));
-  });
+  .get(
+    // Perform validation on params and querystring
+    [
+      param("pollutant").isIn(Object.values(AirQualityPollutant)),
+      query("aggregate").exists().isIn(Object.values(SQLAggregateFunction)),
+      query("datetime_start").exists().isISO8601(),
+      query("datetime_end").exists().isISO8601()
+    ],
+    // The any types here are because we don't care about the ResBody, ReqBody or Res
+    async (req: Request<GetStationMeasurementAggregatedParamsRoute, any, any, GetStationMeasurementAggregatedParamsQS>, res: any) => {
+      const validation = validationResult(req);
+      if (validation.isEmpty()) {
+        // Merge both route params and query string params into a new object with all the data
+        const params: GetStationMeasurementAggregatedParams = Object.assign({}, req.params, req.query);
+        res.json(await getStationMeasurementAggregated(params));
+      } else {
+        res.status(400).json({ errors: validation.array() });
+      }
+    }
+  );
 
 /**
  * Set-up a route for the second use case: Timeserie for stations.
@@ -62,14 +79,27 @@ cartoRouter
   // Set-up the request to handle router params and query string params using our types
   // Both the any types here are because we don't care about the ResBody or ReqBody
   .get(
+    // Perform validation on params and querystring
+    [
+      param("pollutant").isIn(Object.values(AirQualityPollutant)),
+      query("aggregate").exists().isIn(Object.values(SQLAggregateFunction)),
+      query("datetime_start").exists().isISO8601(),
+      query("datetime_end").exists().isISO8601(),
+      query("step").exists().isIn(Object.values(TimeSerieStep))
+    ],
     async (
       req: Request<GetStationMeasurementAggregatedTimeSerieParamsRoute, any, any, GetStationMeasurementAggregatedTimeSerieParamsQS>,
-      res
+      res: any
     ) => {
-      // Merge both route params and query string params into a new object with all the data
-      const params: GetStationMeasurementAggregatedTimeSerieParams = Object.assign({}, req.params, req.query);
-      // Call the service with the request params and return the response to the client as json
-      res.json(await getStationMeasurementAggregatedTimeSerie(params));
+      const validation = validationResult(req);
+      if (validation.isEmpty()) {
+        // Merge both route params and query string params into a new object with all the data
+        const params: GetStationMeasurementAggregatedTimeSerieParams = Object.assign({}, req.params, req.query);
+        // Call the service with the request params and return the response to the client as json
+        res.json(await getStationMeasurementAggregatedTimeSerie(params));
+      } else {
+        res.status(400).json({ errors: validation.array() });
+      }
     }
   );
 
