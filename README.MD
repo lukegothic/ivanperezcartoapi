@@ -153,7 +153,7 @@ As time was constrained, I purposely left tests out to be implemented afterwards
 
 After having both Use Cases up and running, I spent some time thoroughly documenting all the code and the queries. Also, now having the whole picture of the project in place, it was time to perform the last big refactor taking into account all the parts of the solution, mostly rearranging constants, domains and models and sorting common code together.
 
-Finally, I delved into Carto's Builder and built a map [builder] representing Use Case 1; in particular I'm showing the stations and the maximum measured value of o3 in the year 2015 on one layer, and the filtered geographical grid with population in which the stations are on another layer.
+Finally, I delved into Carto's Builder and built a [map][builder] representing Use Case 1; in particular I'm showing the stations and the maximum measured value of o3 in the year 2015 on one layer, and the filtered geographical grid with population in which the stations are on another layer.
 
 > That's all.
 > Feel free to contact me on any aclaration needed on the provided solution and code. It's been a pleasure working with the Carto platform.
